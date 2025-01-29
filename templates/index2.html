@@ -104,7 +104,7 @@
             const database = document.getElementById('database').value;
             const table = document.getElementById('table').value;
             const columnDropdown = document.getElementById('key_column');
-            columnDropdown.innerHTML = '<option value="">Select a Column</option>';
+            //columnDropdown.innerHTML = '<option value="">Select a Column</option>';
 
             if (database && table) {
                 try {
@@ -133,38 +133,32 @@
         }
 
         async function deleteData() {
-            const database = document.getElementById('database').value;
-            const table = document.getElementById('table').value;
-            const keyColumn = document.getElementById('key_column').value;
-            const days = document.getElementById('record_days').value;
-            console.log("keycolumn:",keyColumn);
-        
-            if (!database || !table || !keyColumn || !days) {
-                alert("Please select database, table, key column, and record days.");
-                return;
-            }
+    const database = document.getElementById('database').value;
+    const table = document.getElementById('table').value;
+    const keyColumn = document.getElementById('key_column').value;
+    const days = document.getElementById('record_days').value;
 
-            try {
-                // const response = await fetch('/delete-data', {
-                //     method: 'POST',
-                //     headers: {'Content-Type': 'application/x-form-urlencoded'},
-                //     body: new URLSearchParams({
-                //         database,
-                //         table,
-                //         key_column: keyColumn,
-                //         days
-                //     })
-                // });
-                const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}`);
+    if (!database || !table || !keyColumn || !days) {
+        alert("Please select database, table, key column, and record days.");
+        return;
+    }
 
-                const result = await response.json();
-                console.log("response: ",response);
-                console.log("result: ",result);
-                alert(result.message || result.error);
-            } catch (error) {
-                console.error("Error deleting data:", error);
-            }
-        }
+    try {
+        const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days${days}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({ days: days })
+        });
+
+        const result = await response.json();
+        alert(result.message || result.error);
+    } catch (error) {
+        console.error("Error deleting data:", error);
+    }
+}
+
     </script>
 </head>
 <body>

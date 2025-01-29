@@ -127,18 +127,32 @@ def delete_data():
     database = request.args.get('database')
     table = request.args.get('table')
     days = request.form.get('days')
-
-    print(f"Parameters at get table- details  received - Database: {database}, Table: {table}, days: {days}")
+    column = request.args.get('key-column')
+    
+    
+   # print(f"Parameters at delete table- details  received - Database: {database}, Table: {table},column:{column}, days: {days}")
 
     if not database or not table or not days:
         return jsonify({"error": "All fields are required"}), 400
 
     try:
+        days=int(days)
         conn = get_db_connection(database)
         cursor = conn.cursor()
-        deletion_query = sql.SQL("DELETE FROM {table} WHERE created_at < NOW() - INTERVAL %s").format(
-            table=sql.Identifier(table)
-        )
+        print("query in process")
+        deletion_query = sql.SQL("""
+    DELETE FROM {table}
+    WHERE {column} NOT BETWEEN 
+        (SELECT (MAX({column})-  {days}) FROM {table}) 
+        AND 
+        (SELECT MAX({column}) FROM {table})
+""").format(
+    table=sql.Identifier(table),
+    column=sql.Identifier(column)
+)
+
+        print(f"deletion queryu:",deletion_query)
+        
         cursor.execute(deletion_query, (f'{int(days)} days',))
         conn.commit()
         cursor.close()
