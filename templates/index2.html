@@ -82,6 +82,33 @@
             const table = document.getElementById('table').value;
             const keyColumn = document.getElementById('key_column').value;
             console.log("keycolumn 3:",keyColumn);
+            const columnDropdown = document.getElementById('key_column');
+            columnDropdown.innerHTML = '<option value="">Select a Column</option>';
+
+            if (database && table) {
+                try {
+                    const response = await fetch(`/get-table-details?database=${database}&table=${table}&key-column=${keyColumn}`);
+                    const details = await response.json();
+                    document.getElementById('table_name').textContent = table || "---";
+                    document.getElementById('table_size').textContent = details.table_size || "---";
+                    document.getElementById('record_count').textContent = details.record_count || "---";
+                    document.getElementById('min_date').textContent = details.min_date || "---";
+                    document.getElementById('max_date').textContent = details.max_date || "---";
+                    
+                    await fetchColumns();
+                } catch (error) {
+                    console.error("Error fetching table details:", error);
+                }
+            }
+        }
+
+
+
+        async function fetchTableDetails2() {
+            const database = document.getElementById('database').value;
+            const table = document.getElementById('table').value;
+            const keyColumn = document.getElementById('key_column').value;
+            console.log("keycolumn 3:",keyColumn);
 
             if (database && table) {
                 try {
@@ -133,31 +160,29 @@
         }
 
         async function deleteData() {
-    const database = document.getElementById('database').value;
-    const table = document.getElementById('table').value;
-    const keyColumn = document.getElementById('key_column').value;
-    const days = document.getElementById('record_days').value;
+                const database = document.getElementById('database').value;
+                const table = document.getElementById('table').value;
+                const keyColumn = document.getElementById('key_column').value;
+                const days = document.getElementById('record_days').value;
+                console.log("Days:", days);
 
-    if (!database || !table || !keyColumn || !days) {
-        alert("Please select database, table, key column, and record days.");
-        return;
-    }
+                if (!database || !table || !keyColumn || !days) {
+                    alert("Please select database, table, key column, and record days.");
+                    return;
+                }
 
-    try {
-        const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days${days}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: new URLSearchParams({ days: days })
-        });
+                try {
+                    const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}`, {  // Send days in the query params
+                        method: "POST"
+                    });
 
-        const result = await response.json();
-        alert(result.message || result.error);
-    } catch (error) {
-        console.error("Error deleting data:", error);
-    }
-}
+                    const result = await response.json();
+                    alert(result.message || result.error);
+                } catch (error) {
+                    console.error("Error deleting data:", error);
+                }
+            }
+
 
     </script>
 </head>
@@ -183,7 +208,7 @@
 
                 <div class="form-group">
                     <label for="key_column" class="form-label">Key Column:</label>
-                    <select name="key_column" id="key_column" class="form-select" onchange="fetchTableDetails()" required>
+                    <select name="key_column" id="key_column" class="form-select" onchange="fetchTableDetails2()" required>
                         <option value="">Select a Column</option>
                     </select>
                 </div>

@@ -124,42 +124,47 @@ def get_table_details():
 # Route to delete data
 @app.route('/delete-data', methods=['POST'])
 def delete_data():
-    database = request.args.get('database')
-    table = request.args.get('table')
-    days = request.form.get('days')
-    column = request.args.get('key-column')
+    del_database = request.args.get('database')
+    del_table = request.args.get('table')
+    del_days = request.args.get('days')  
+    del_column = request.args.get('key-column')
     
+    print("Database:",del_database)
+    print("Table:",del_table)
+    print("Column:",del_column)
+    print("Days:",del_days)
     
-   # print(f"Parameters at delete table- details  received - Database: {database}, Table: {table},column:{column}, days: {days}")
-
-    if not database or not table or not days:
+    if not del_database or not del_table or not del_days:
         return jsonify({"error": "All fields are required"}), 400
 
     try:
-        days=int(days)
-        conn = get_db_connection(database)
+        days=int(del_days)
+        conn = get_db_connection(del_database)
         cursor = conn.cursor()
         print("query in process")
         deletion_query = sql.SQL("""
-    DELETE FROM {table}
-    WHERE {column} NOT BETWEEN 
-        (SELECT (MAX({column})-  {days}) FROM {table}) 
-        AND 
-        (SELECT MAX({column}) FROM {table})
+DELETE FROM {table}
+WHERE {column} NOT BETWEEN 
+    (SELECT (MAX({column}) - {days}) FROM {table}) 
+    AND 
+    (SELECT MAX({column}) FROM {table})
 """).format(
-    table=sql.Identifier(table),
-    column=sql.Identifier(column)
+    table=sql.Identifier(del_table),
+    column=sql.Identifier(del_column),
+    days=sql.Literal(days)  # Fix this!
 )
+
 
         print(f"deletion queryu:",deletion_query)
         
-        cursor.execute(deletion_query, (f'{int(days)} days',))
+        cursor.execute(deletion_query)
         conn.commit()
         cursor.close()
         conn.close()
         return jsonify({"message": "Data deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)
