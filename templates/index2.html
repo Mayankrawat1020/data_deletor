@@ -102,9 +102,7 @@
             }
         }
 
-
-
-        async function fetchTableDetails2() {
+        async function fetchcolumnnDetails() {
             const database = document.getElementById('database').value;
             const table = document.getElementById('table').value;
             const keyColumn = document.getElementById('key_column').value;
@@ -126,6 +124,7 @@
                 }
             }
         }
+
 
         async function fetchColumns() {
             const database = document.getElementById('database').value;
@@ -208,7 +207,7 @@
 
                 <div class="form-group">
                     <label for="key_column" class="form-label">Key Column:</label>
-                    <select name="key_column" id="key_column" class="form-select" onchange="fetchTableDetails2()" required>
+                    <select name="key_column" id="key_column" class="form-select" onchange="fetchcolumnnDetails()" required>
                         <option value="">Select a Column</option>
                     </select>
                 </div>
@@ -225,7 +224,7 @@
                 <p><strong>Min Date:</strong> <span id="min_date">---</span></p>
 
                 <div class="form-group">
-                    <label for="record_days" class="form-label">Record Keep Days:</label>
+                    <label for="record_days" class="form-label"> Number of Days to Keep Records:</label>
                     <input type="number" id="record_days" class="form-control" onchange="calculateDeleteDate()">
                 </div>
                 <p><strong>Record Delete Date:</strong> <span id="delete_date">---</span></p>
@@ -234,7 +233,14 @@
             <div class="buttons">
                 <button class="btn btn-success" onclick="deleteData()">Delete</button>
                 <button class="btn btn-primary">Schedule</button>
-                <button class="btn btn-danger">Exit</button>
+                <button class="btn btn-danger" onclick="exitWindow()">Exit</button>
+                <!-- this is the script to close the window --> 
+                <script>
+                function exitWindow() {
+                    window.close();
+                }
+                </script>
+
             </div>
         </div>
     </div>
