@@ -159,29 +159,34 @@
         }
 
         async function deleteData() {
-                const database = document.getElementById('database').value;
-                const table = document.getElementById('table').value;
-                const keyColumn = document.getElementById('key_column').value;
-                const days = document.getElementById('record_days').value;
-                console.log("Days:", days);
+    const database = document.getElementById('database').value;
+    const table = document.getElementById('table').value;
+    const keyColumn = document.getElementById('key_column').value;
+    const days = document.getElementById('record_days').value;
+    const recordCount = document.getElementById('record_count').textContent; // Fetch record count
 
-                if (!database || !table || !keyColumn || !days) {
-                    alert("Please select database, table, key column, and record days.");
-                    return;
-                }
+    if (!database || !table || !keyColumn || !days) {
+        alert("Please select database, table, key column, and enter the number of days.");
+        return;
+    }
 
-                try {
-                    const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}`, {  // Send days in the query params
-                        method: "POST"
-                    });
+    // Show confirmation prompt
+    const confirmDelete = confirm(`Are you sure you want to delete ${recordCount} records?`);
+    if (!confirmDelete) {
+        return;
+    }
 
-                    const result = await response.json();
-                    alert(result.message || result.error);
-                } catch (error) {
-                    console.error("Error deleting data:", error);
-                }
-            }
+    try {
+        const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}`, {  
+            method: "POST"
+        });
 
+        const result = await response.json();
+        alert(result.message || result.error);
+    } catch (error) {
+        console.error("Error deleting data:", error);
+    }
+}
 
     </script>
 </head>
