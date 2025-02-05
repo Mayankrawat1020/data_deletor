@@ -126,42 +126,51 @@ def get_table_details():
 def delete_data():
     del_database = request.args.get('database')
     del_table = request.args.get('table')
-    del_days = request.args.get('days')  
+    del_days = request.args.get('days')
     del_column = request.args.get('key-column')
-    
-    print("Database:",del_database)
-    print("Table:",del_table)
-    print("Column:",del_column)
-    print("Days:",del_days)
     
     if not del_database or not del_table or not del_days:
         return jsonify({"error": "All fields are required"}), 400
 
     try:
-        days=int(del_days)
+        days = int(del_days)
         conn = get_db_connection(del_database)
         cursor = conn.cursor()
-        print("query in process")
+
+        # Deletion query
         deletion_query = sql.SQL("""
-DELETE FROM {table}
-WHERE {column} NOT BETWEEN 
-    (SELECT (MAX({column}) - {days}) FROM {table}) 
-    AND 
-    (SELECT MAX({column}) FROM {table})
-""").format(
-    table=sql.Identifier(del_table),
-    column=sql.Identifier(del_column),
-    days=sql.Literal(days)  # Fix this!
-)
+            DELETE FROM {table}
+            WHERE {column} NOT BETWEEN 
+                (SELECT (MAX({column}) - {days}) FROM {table}) 
+                AND 
+                (SELECT MAX({column}) FROM {table})
+        """).format(
+            table=sql.Identifier(del_table),
+            column=sql.Identifier(del_column),
+            days=sql.Literal(days)
+        )
 
-
-        print(f"deletion queryu:",deletion_query)
-        
         cursor.execute(deletion_query)
         conn.commit()
+
+        # Insert details into delete_data
+        insert_log_query = sql.SQL("""
+            INSERT INTO delete_data (server_name, database_name, table_name, record_keep_days, frequency, run_date, next_run_date)
+            VALUES (%s, %s, %s, %s, %s, NOW(), %s)
+        """)
+
+        server_name = "localhost"  # Change this if dynamic
+        frequency = 1
+        next_run_date = None
+
+        cursor.execute(insert_log_query, (server_name, del_database, del_table, days, frequency, next_run_date))
+        conn.commit()
+
         cursor.close()
         conn.close()
-        return jsonify({"message": "Data deleted successfully"}), 200
+
+        return jsonify({"message": "Data deleted successfully and logged"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
