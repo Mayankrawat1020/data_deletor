@@ -128,7 +128,8 @@ def delete_data():
     del_table = request.args.get('table')
     del_days = request.args.get('days')
     del_column = request.args.get('key-column')
-    
+    user_executing = request.remote_addr
+
     if not del_database or not del_table or not del_days:
         return jsonify({"error": "All fields are required"}), 400
 
@@ -137,7 +138,7 @@ def delete_data():
         conn = get_db_connection(del_database)
         cursor = conn.cursor()
 
-        # Deletion query
+        # Deletion query (Not Modified)
         deletion_query = sql.SQL("""
             DELETE FROM {table}
             WHERE {column} NOT BETWEEN 
@@ -151,29 +152,43 @@ def delete_data():
         )
 
         cursor.execute(deletion_query)
+        deleted_count = cursor.rowcount
         conn.commit()
 
-        # Insert details into delete_data
-        insert_log_query = sql.SQL("""
-            INSERT INTO delete_data (server_name, database_name, table_name, record_keep_days, frequency, run_date, next_run_date)
-            VALUES (%s, %s, %s, %s, %s, NOW(), %s)
-        """)
+        if deleted_count > 0:
+            # Log deletion into delete_data_log
+            log_query = sql.SQL("""
+                INSERT INTO delete_data_log (server_name, database_name, table_name, record_keep_days, records_deleted, execution_date, user_executing)
+                VALUES (%s, %s, %s, %s, %s, NOW(), %s)
+            """)
 
-        server_name = "localhost"  # Change this if dynamic
-        frequency = 1
-        next_run_date = None
+            server_name = "localhost"
+            cursor.execute(log_query, (server_name, del_database, del_table, days, deleted_count, user_executing))
+            conn.commit()
 
-        cursor.execute(insert_log_query, (server_name, del_database, del_table, days, frequency, next_run_date))
-        conn.commit()
+        # Check if table already exists in delete_data
+        check_query = sql.SQL("SELECT 1 FROM delete_data WHERE table_name = %s LIMIT 1")
+        cursor.execute(check_query, (del_table,))
+        table_exists = cursor.fetchone()
+
+        if not table_exists:
+            insert_query = sql.SQL("""
+                INSERT INTO delete_data (server_name, database_name, table_name, record_keep_days, frequency, run_date, next_run_date)
+                VALUES (%s, %s, %s, %s, %s, NOW(), %s)
+            """)
+
+            frequency = 1
+            next_run_date = None
+            cursor.execute(insert_query, (server_name, del_database, del_table, days, frequency, next_run_date))
+            conn.commit()
 
         cursor.close()
         conn.close()
 
-        return jsonify({"message": "Data deleted successfully and logged"}), 200
+        return jsonify({"message": f"Deleted {deleted_count} records from {del_table} and logged the operation."}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    
+
 if __name__ == '__main__':
     app.run(debug=True)
