@@ -121,7 +121,9 @@ def get_table_details():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # Route to delete data
+
 @app.route('/delete-data', methods=['POST'])
 def delete_data():
     del_database = request.args.get('database')
@@ -130,7 +132,7 @@ def delete_data():
     del_column = request.args.get('key-column')
     user_executing = request.remote_addr
 
-    if not del_database or not del_table or not del_days:
+    if not del_database or not del_table or not del_days or not del_column:
         return jsonify({"error": "All fields are required"}), 400
 
     try:
@@ -138,20 +140,49 @@ def delete_data():
         conn = get_db_connection(del_database)
         cursor = conn.cursor()
 
-        # Deletion query (Not Modified)
-        deletion_query = sql.SQL("""
-            DELETE FROM {table}
-            WHERE {column} NOT BETWEEN 
-                (SELECT (MAX({column}) - {days}) FROM {table}) 
-                AND 
-                (SELECT MAX({column}) FROM {table})
-        """).format(
-            table=sql.Identifier(del_table),
-            column=sql.Identifier(del_column),
-            days=sql.Literal(days)
-        )
+        # Get column data type (Check table schema explicitly)
+        cursor.execute("""
+            SELECT data_type, table_schema 
+            FROM information_schema.columns 
+            WHERE table_name = %s 
+            AND column_name = %s;
+        """, (del_table, del_column))
+        
+        column_info = cursor.fetchone()
+        if not column_info:
+            return jsonify({"error": f"Column '{del_column}' not found in table '{del_table}'"}), 400
 
-        cursor.execute(deletion_query)
+        column_type, table_schema = column_info
+        column_type = column_type.lower()
+
+        # Dynamically form the deletion query based on column type
+        if "timestamp" in column_type or "date" in column_type:
+            delete_query = sql.SQL("""
+                DELETE FROM {schema}.{table}
+                WHERE {key_column} <= (SELECT MAX({key_column}) - INTERVAL %s FROM {schema}.{table})
+            """).format(
+                schema=sql.Identifier(table_schema),
+                table=sql.Identifier(del_table),
+                key_column=sql.Identifier(del_column)
+            )
+            cursor.execute(delete_query, (f"{days} days",))
+
+        elif "char" in column_type:  # Handles VARCHAR, TEXT, CHAR
+            delete_query = sql.SQL("""
+                DELETE FROM {table}
+                WHERE TO_DATE({key_column}, 'YYYY-MM-DD') < (
+                SELECT MAX(TO_DATE({key_column}, 'YYYY-MM-DD')) FROM {table}
+                ) - INTERVAL %s
+            """).format(
+            table=sql.Identifier(del_table),
+            key_column=sql.Identifier(del_column)
+            )
+            cursor.execute(delete_query, (f"{days} days",))
+
+        
+        else:
+            return jsonify({"error": "Unsupported key column type"}), 400
+
         deleted_count = cursor.rowcount
         conn.commit()
 
@@ -161,12 +192,11 @@ def delete_data():
                 INSERT INTO delete_data_log (server_name, database_name, table_name, record_keep_days, records_deleted, execution_date, user_executing)
                 VALUES (%s, %s, %s, %s, %s, NOW(), %s)
             """)
-
             server_name = "localhost"
             cursor.execute(log_query, (server_name, del_database, del_table, days, deleted_count, user_executing))
             conn.commit()
 
-        # Check if table already exists in delete_data
+        # Check if table exists in delete_data
         check_query = sql.SQL("SELECT 1 FROM delete_data WHERE table_name = %s LIMIT 1")
         cursor.execute(check_query, (del_table,))
         table_exists = cursor.fetchone()
@@ -176,8 +206,8 @@ def delete_data():
                 INSERT INTO delete_data (server_name, database_name, table_name, record_keep_days, frequency, run_date, next_run_date)
                 VALUES (%s, %s, %s, %s, %s, NOW(), %s)
             """)
-
             frequency = 1
+            server_name = "localhost"
             next_run_date = None
             cursor.execute(insert_query, (server_name, del_database, del_table, days, frequency, next_run_date))
             conn.commit()
@@ -186,6 +216,9 @@ def delete_data():
         conn.close()
 
         return jsonify({"message": f"Deleted {deleted_count} records from {del_table} and logged the operation."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
