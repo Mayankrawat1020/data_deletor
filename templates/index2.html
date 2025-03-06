@@ -3,19 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Data from Tables</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <title>Schedule Table Deletion</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css" />
+    
+</head>
+
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom navbar-inverse" id="myNavbar">
+        <div class="container-fluid">
+            <!-- Sidebar Icon -->
+            <span class="icon-btn" id="sidebarCollapseBtn" onclick="openNav()"></span>
+
+            <!-- Logo and Brand -->
+            <a class="navbar-brand logo" href="/">
+                <span class="Perfor">Perfor</span><span class="mance">mance</span>
+            </a>
+
+
+            <div class="navbar-right">
+               <div class="btn-group me-4">
+                  <button id="module-btn" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      Module — <span id="selectedModule">Select Module</span>
+                  </button>
+                  <ul class="dropdown-menu" id="module-menu">
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Vizbot')">Vizbot</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Geolytics')">Geolytics</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Procigenx')">Procigenx</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Automation Studio')">Automation Studio</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Topology')">Topology</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('Core Topology')">Core Topology</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="selectModule('PM Tool')">PM Tool</a></li>
+                     </ul>
+                  </div>
+              
+                  <div class="btn-group me-4">
+                     <button id="submodule-btn" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                         Sub-Module
+                     </button>
+                     <ul class="dropdown-menu">
+                         <li><a class="dropdown-item" href="/autostudio/sandbox">Data Sandbox</a></li>
+                         <li><a class="dropdown-item" href="/autostudio/catalyst">Catalyst</a></li>
+                         <li><a class="dropdown-item" href="#">TrendsCraft</a></li>
+                     </ul>
+                 </div>
+                 
+            <!-- Project Code -->
+            <div class="btn-group me-4">
+               <button id="projectDropdownBtn" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                   Select Project
+               </button>
+               <ul id="projectDropdownMenu" class="dropdown-menu">
+                   <!-- Options will be dynamically populated -->
+               </ul>
+           </div>
+           
+        <div id="messageContainer"></div>
+        
+        
+                <!-- Gear Icon with Theme Color Dropdown -->
+                <div class="dropdown">
+                    <a href="#" class="icon-btn" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                    <!-- Color Theme Dropdown -->
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-color">
+                        <li>
+                            <div>Select Theme Color:</div>
+                            <div class="d-flex mt-2">
+
+                                <div id="color-box1" class="color-box bg-white" onclick="setColorTheme('white')"></div>
+
+                                <div onclick="setColorTheme('dark')">Dark Theme</div>
+
+
+                                <div id="color-box3" class="color-box bg-primary" onclick="setColorTheme('primary')"></div>
+
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+
+
+                <!-- Download and Help Icons -->
+
+                <button id="download-all-images" class="icon-btn" onclick="downloadAllGraphs()">
+                    <i class="fas fa-download"></i>
+                </button>
+
+
+                <a href="#" class="icon-btn"><i class="fas fa-question-circle"></i></a>
+
+                <!-- Person Icon with Dropdown -->
+                <div class="dropdown ms-3" id="profile">
+                    <a id="person-icon" class="dropdown-toggle d-flex align-items-center" href="#" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user person-icon"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><a class="dropdown-item" href="#">Change Password</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                       
+                        <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            </div>
+        </div>
+    </nav>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color: white;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            color: black !important;
         }
+
         .wrapper {
             display: flex;
             gap: 20px;
@@ -25,128 +146,584 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+    
+
+        /* NAVBAR */
+
+            
+    .navbar{
+        z-index: 1001;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), /* Base shadow */
+    0 8px 30px rgba(0, 0, 0, 0.1);  /* Additional deeper shadow */
+        transition: all 0.3s ease-in-out; /* Smooth transition for hover effect */
+    }
+    .navbar:hover{
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), /* Slightly darker shadow on hover */
+    0 10px 40px rgba(0, 0, 0, 0.15); /* More depth on hover */
+        transform: translateY(-5px); /* Adds a floating effect */
+    }
+    
+    
+    /* Custom styling for the navbar */
+    .navbar-custom {
+        background-color: #d8f3dc;
+        padding-top: 4px;
+        padding-bottom: 8px;
+    }
+    .navbar-right {
+        display: flex;
+        align-items: center;    /* Vertically align items */
+        justify-content: flex-end;  /* Push items to the right */
+    }
+    /* Dropdown menu style */
+    .navbar-custom .btn {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-right: 1px;
+        margin-left: 1px;
+        border: none; /* remove border */
+        border-radius: 5px; /* rounded corners */
+        transition: all 0.3s ease-in-out;
+    }
+    #module-btn{
+        text-align: center;
+        width: 40vh;
+        background-color: #95d5b2;
+        color: black;
+        margin-top: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 1px solid black;
+    }
+    #module-btn:hover{
+        background-color: #333;
+        color: #f1f1f1;
+    }
+    #submodule-btn{
+        text-align: center;
+        width: 22vh;
+        background-color: #95d5b2;
+        color: black;
+        margin-top: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 1px solid black;
+    }
+    #submodule-btn:hover{
+        background-color: #333;
+        color: #f1f1f1;
+    }
+    
+    .navbar-right .btn-group {
+        margin-right: 5px; /* Minimal right margin */
+        margin-left: 0;    /* No left margin */
+    }
+    
+    /* Specific styling for the VodaCom text info */
+    .btn-group span {
+        margin-left: 0.5px;
+        margin-right: 3px;
+        font-size: 1rem;     /* Adjust the text size */
+    }
+    
+    .projectDropdownBtn {
+        text-align: center;
+        width: 30vh;
+        background-color: #95d5b2;
+        color: black;
+        margin-top: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 1px solid black;
+    }
+    
+    .btn-primary.dropdown-toggle {
+        text-align: center;
+        width: 30vh;
+        background-color: #95d5b2;
+        color: black;
+        margin-top: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 1px solid black;
+    }
+    
+    .btn-primary + .dropdown-menu .dropdown-item.active {
+        color: #000; /* White text for active item */
+        background-color: #95d5b2; /* Blue background for active item */
+    
+    }
+    
+    .dropdown-menu .dropdown-item.selected {
+        background-color: #95d5b2; /* Green background for selected item */
+        color: white; /* White text for contrast */
+    }
+    
+    
+    /* Dropdown item style */
+    .navbar-custom .dropdown-menu .dropdown-item {
+        color: #333; /* text color */
+        padding: 10px 20px; /* padding for items */
+        font-weight: bold;
+        border-radius: 6px; /* round the item edges */
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    /* Hover effect for dropdown items */
+    .navbar-custom .dropdown-menu .dropdown-item:hover {
+        background-color: black; /* hover color */
+        color: white; /* change text color on hover */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* subtle hover shadow */
+    }
+    
+    /* Custom caret style (dropdown arrow) */
+    .navbar-custom .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: 0.255em;
+        vertical-align: 0.255em;
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-left: 0.3em solid transparent;
+        color: white;
+    }
+    
+    /* Hover effect for the dropdown toggle (button itself) */
+    .navbar-custom .dropdown-toggle:hover {
+        color: #fff;
+        background-color: lightsteelblue; /* change color on hover */
+        border-radius: 8px;
+    }
+    
+    /* Show dropdown with a fade-in effect */
+    .navbar-custom .dropdown-menu.show {
+        opacity: 0;
+        animation: fadeInDropdown 0.5s forwards;
+    }
+    
+    @keyframes fadeInDropdown {
+        from {
+    opacity: 0;
+    transform: translateY(-20px); /* slide down */
+        }
+        to {
+    opacity: 1;
+    transform: translateY(0);
+        }
+    }
+    .navbar-brand {
+        position: absolute; /* Use absolute positioning to align it within the sidebar */
+        left: 20px; /* Align to the left within the sidebar */
+        margin: 0; /* Remove any default margin */
+        padding: 5px; /* Optional: add padding if needed */
+        color: white; /* Optional: set text color */
+        z-index: 1002; /* Ensure it's on top of other sidebar elements */
+        font-family: 'Poppins', sans-serif;  /* Modern and elegant font */
+        font-size: 35px;       /* Slightly larger font for prominence */
+        font-weight: bold;     /* Bold for strong visibility */
+        letter-spacing: 1px;
+    }
+    .Perfor {
+        color: black;   /* Blue color for the "Biz" part */
+    }
+
+    .mance {
+        color: #ef233c;   /* Green color for the "Bot" part */
+    }
+    .icon-btn{
+    color: black;
+    margin-left: 1px; /* Spacing between icon and buttons */
+    margin-right: 4px;
+    /*size: 8rem;*/
+}
+
+
+.icon-btn:hover{
+    color: #ef233c !important;
+    size: 10rem;
+}
+
+#download-all-images{
+    border: none;
+    width: 7%;
+    background-color: #d8f3dc;
+    margin-top: 0.1%;
+    margin-right: 1.5%;
+   
+}
+#download-all-images:hover{
+    background-color: #d8f3dc !important;
+
+}
+
+#person-icon{
+    color: black;
+}
+#person-icon:hover{
+    color: #ef233c;
+}
+
+/* Color Theme Dropdown */
+.dropdown-menu-color {
+    padding: 10px;
+}
+.color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border: 2px solid #fff;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.color-box:hover {
+    border-color: black;
+}
+#VodaCom{
+    border: 0px solid black;
+    width: 33vh;
+    height: 3vh;
+    font-size: 1.2rem;
+    margin-right: 0.1%;
+}
+    /* Navbar container */
+    .navbar-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #d8f3dc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Navbar brand/logo */
+    .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Navbar links */
+    .navbar-links {
+        display: flex;
+        gap: 15px;
+    }
+
+    .navbar-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        transition: color 0.3s ease;
+    }
+
+    .navbar-links a:hover {
+        color: #ef233c;
+    }
+
+    /* Navbar dropdown */
+    .navbar-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .navbar-dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    .navbar-dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .navbar-dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    .navbar-dropdown:hover .navbar-dropdown-content {
+        display: block;
+    }
+
+
+            /* Custom Button Styles */
+    .custom-btn {
+        background-color: #95d5b2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, transform 0.2s;
+    }
+
+    /* Hover effect */
+    .custom-btn:hover {
+        background-color: #000; /* Black hover effect */
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Active effect */
+    .custom-btn:active {
+        background-color: #333; /* Slightly lighter black for click */
+        transform: scale(0.98);
+    }
+
+        
         .left-section, .right-section {
             flex: 1;
         }
+
         .right-section {
             border-left: 2px solid #ccc;
             padding-left: 20px;
             display: flex;
             flex-direction: column;
         }
-        .buttons {
-            display: flex;
+
+        .modal {
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
             justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            align-items: center;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        .modal-dialog {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
         }
-        select, input {
-            margin-bottom: 15px;
-        }
-        .details-section {
-            flex-grow: 1;
+
+        .close {
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
         }
     </style>
+    
+    
+</head>
+<body>
+
+    <div class="wrapper">
+        <div class="left-section">
+            <h2 class="text-center mb-4">Data Deletor</h2>
+            <form>
+                <div class="form-group">
+                    <label for="database">Database:</label>
+                    <select id="database" class="form-select" onchange="fetchTables()">
+                        <option value="">Select a Database</option>
+                        <option value="db1">dummy_database</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="table">Table:</label>
+                    <select id="table" class="form-select" onchange="fetchColumns()">
+                        <option value="">Select a Table</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="key_column">Key Column:</label>
+                    <select id="key_column" class="form-select" onchange="fetchTableDetails()">
+                        <option value="">Select a Column</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="right-section">
+            <div class="details-section">
+                <h4>Table Details</h4>
+                <p><strong>Table Name:</strong> <span id="table_name">---</span></p>
+                <p><strong>Table Size:</strong> <span id="table_size">---</span></p>
+                <p><strong>Record Count:</strong> <span id="record_count">---</span></p>
+                <p><strong>Min Date:</strong> <span id="min_date">---</span></p>
+                <p><strong>Max Date:</strong> <span id="max_date">---</span></p>
+
+                <div class="form-group">
+                    <label for="record_days">Number of Days to Keep Records:</label>
+                    <input type="number" id="record_days" class="form-control" onchange="calculateDeleteDate()">
+                </div>
+                <p><strong>Record Delete Date:</strong> <span id="delete_date">---</span></p>
+            </div>
+
+            <div class="buttons">
+                <button class="custom-btn" onclick="deleteData()">Delete</button>
+                
+                <!-- Schedule Button -->
+                <button id="schedule_btn" class="custom-btn" onclick="openScheduleModal()">Schedule</button>
+            
+                <!-- Modal (Hidden Initially) -->
+                <div id="schedule_modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeScheduleModal()">&times;</span>
+                        <h3>Schedule Task</h3>
+                        
+                        <label for="schedule_frequency">Select Frequency:</label>
+                        <select id="schedule_frequency" class="form-select" name="frequency" onchange="updateNextRunDate()">
+                            <option value="1">1 (Daily)</option>
+                            <option value="2">2 (Alternate Days)</option>
+                            <option value="7">7 (Weekly)</option>
+                            <option value="30">30 (Monthly)</option>
+                        </select>
+
+            
+                        <p><strong>Next Run Date:</strong> <span id="next_run_date">---</span></p>
+            
+                        <button class="btn btn-success" onclick="validateBeforeSchedule()">Confirm Schedule</button>
+                        <button class="btn btn-secondary" onclick="closeScheduleModal()">Close</button>
+                    </div>
+                </div>
+            
+                <button class="custom-btn" onclick="exitWindow()">Exit</button>
+            </div>
+            
+            <!-- CSS for Modal -->
+            <style>
+                .modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .modal-content {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    width: 300px;
+                    text-align: center;
+                    position: relative;
+                }
+                .close {
+                    position: absolute;
+                    top: 10px;
+                    right: 15px;
+                    font-size: 20px;
+                    cursor: pointer;
+                }
+                .custom-btn {
+                    padding: 10px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    background-color: #95d5b2;
+                    color: black;
+                    transition: 0.3s;
+                }
+                .custom-btn:hover {
+                    background-color: black;
+                    color: white;
+                }
+            </style>
+            
+            <!-- JavaScript -->
+            <script>
+                function openScheduleModal() {
+                    document.getElementById("schedule_modal").style.display = "flex"; // Show the modal
+                }
+            
+                function closeScheduleModal() {
+                    document.getElementById("schedule_modal").style.display = "none"; // Hide the modal
+                }
+            
+                function updateNextRunDate() {
+                    const frequency = document.getElementById("schedule_frequency").value;
+                    if (frequency) {
+                        let nextDate = new Date();
+                        nextDate.setDate(nextDate.getDate() + parseInt(frequency));
+                        document.getElementById("next_run_date").textContent = nextDate.toISOString().split('T')[0];
+                    }
+                }
+            
+                function confirmSchedule() {
+                    alert("Schedule confirmed!");
+                    closeScheduleModal();
+                }
+            
+                function exitWindow() {
+                    alert("Exiting window...");
+                }
+            
+                function deleteData() {
+                    alert("Data deleted!");
+                }
+            </script>
+            
+
+    
     <script>
         async function fetchTables() {
-            const database = document.getElementById('database').value;
-            const tableDropdown = document.getElementById('table');
-            const keyColumnDropdown = document.getElementById('key_column');
-            
+            const database = document.getElementById("database").value;
+            const tableDropdown = document.getElementById("table");
             tableDropdown.innerHTML = '<option value="">Select a Table</option>';
-            keyColumnDropdown.innerHTML = '<option value="">Select a Column</option>';
-            
+
             if (database) {
-                try {
-                    const response = await fetch(`/get-tables?database=${database}`);
-                    const tables = await response.json();
-                    tables.forEach(table => {
-                        const option = document.createElement('option');
-                        option.value = table;
-                        option.textContent = table;
-                        tableDropdown.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error("Error fetching tables:", error);
-                }
+                const response = await fetch(`/get-tables?database=${database}`);
+                const tables = await response.json();
+                tables.forEach(table => {
+                    const option = document.createElement("option");
+                    option.value = table;
+                    option.textContent = table;
+                    tableDropdown.appendChild(option);
+                });
+            }
+        }
+
+        async function fetchColumns() {
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const columnDropdown = document.getElementById("key_column");
+            columnDropdown.innerHTML = '<option value="">Select a Column</option>';
+
+            if (database && table) {
+                const response = await fetch(`/get-columns?database=${database}&table=${table}`);
+                const columns = await response.json();
+                columns.forEach(column => {
+                    const option = document.createElement("option");
+                    option.value = column;
+                    option.textContent = column;
+                    columnDropdown.appendChild(option);
+                });
             }
         }
 
         async function fetchTableDetails() {
-            const database = document.getElementById('database').value;
-            const table = document.getElementById('table').value;
-            const keyColumn = document.getElementById('key_column').value;
-            console.log("keycolumn 3:",keyColumn);
-            const columnDropdown = document.getElementById('key_column');
-            columnDropdown.innerHTML = '<option value="">Select a Column</option>';
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const column = document.getElementById("key_column").value;
 
-            if (database && table) {
-                try {
-                    const response = await fetch(`/get-table-details?database=${database}&table=${table}&key-column=${keyColumn}`);
-                    const details = await response.json();
-                    document.getElementById('table_name').textContent = table || "---";
-                    document.getElementById('table_size').textContent = details.table_size || "---";
-                    document.getElementById('record_count').textContent = details.record_count || "---";
-                    document.getElementById('min_date').textContent = details.min_date || "---";
-                    document.getElementById('max_date').textContent = details.max_date || "---";
-                    
-                    await fetchColumns();
-                } catch (error) {
-                    console.error("Error fetching table details:", error);
-                }
+            if (database && table && column) {
+                const response = await fetch(`/get-table-details?database=${database}&table=${table}&key-column=${column}`);
+                const details = await response.json();
+                document.getElementById("table_name").textContent = table || "---";
+                document.getElementById("table_size").textContent = details.table_size || "---";
+                document.getElementById("record_count").textContent = details.record_count || "---";
+                document.getElementById("min_date").textContent = details.min_date || "---";
+                document.getElementById("max_date").textContent = details.max_date || "---";
             }
         }
 
-        async function fetchcolumnnDetails() {
-            const database = document.getElementById('database').value;
-            const table = document.getElementById('table').value;
-            const keyColumn = document.getElementById('key_column').value;
-            console.log("keycolumn 3:",keyColumn);
-
-            if (database && table) {
-                try {
-                    const response = await fetch(`/get-table-details?database=${database}&table=${table}&key-column=${keyColumn}`);
-                    const details = await response.json();
-                    document.getElementById('table_name').textContent = table || "---";
-                    document.getElementById('table_size').textContent = details.table_size || "---";
-                    document.getElementById('record_count').textContent = details.record_count || "---";
-                    document.getElementById('min_date').textContent = details.min_date || "---";
-                    document.getElementById('max_date').textContent = details.max_date || "---";
-                    
-                    await fetchColumns();
-                } catch (error) {
-                    console.error("Error fetching table details:", error);
-                }
-            }
-        }
-
-
-        async function fetchColumns() {
-            const database = document.getElementById('database').value;
-            const table = document.getElementById('table').value;
-            const columnDropdown = document.getElementById('key_column');
-            //columnDropdown.innerHTML = '<option value="">Select a Column</option>';
-
-            if (database && table) {
-                try {
-                    const response = await fetch(`/get-columns?database=${database}&table=${table}`);
-                    const columns = await response.json();
-                    columns.forEach(column => {
-                        const option = document.createElement('option');
-                        option.value = column;
-                        option.textContent = column;
-                        columnDropdown.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error("Error fetching columns:", error);
-                }
-            }
-        }
 
         function calculateDeleteDate() {
             let maxDate = document.getElementById("max_date").textContent;
@@ -187,67 +764,79 @@
         console.error("Error deleting data:", error);
     }
 }
+    function calculateNextRun() {
+    let frequency = document.getElementById("frequency").value;
+    if (frequency && !isNaN(frequency) && frequency > 0) {
+        let today = new Date();
+        today.setDate(today.getDate() + parseInt(frequency));
+        document.getElementById("nextRunDate").textContent = today.toISOString().split('T')[0];
+    } else {
+        document.getElementById("nextRunDate").textContent = "---"; // Reset if invalid
+    }
+}
+function scheduleTask() {
+    const database = document.getElementById("database").value;
+    const table = document.getElementById("table").value;
+    const keyColumn = document.getElementById("key_column").value;
+    const days = document.getElementById("record_days").value;
+    const frequency = document.getElementById("frequency").value;
 
+    if (!database || !table || !keyColumn || !days || !frequency) {
+        alert("Please fill in all required fields: Database, Table, Key Column, Number of Days to Keep Records, and Frequency.");
+        return;
+    }
+
+    // Proceed with scheduling logic
+
+    
+    alert(`Task scheduled successfully! Frequency: ${frequency} days`);
+    closeModal();  
+    }
+
+
+
+    async function validateBeforeSchedule() {
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const keyColumn = document.getElementById("key_column").value;
+            const days = document.getElementById("record_days").value;
+            const frequency = document.getElementById("schedule_frequency").value;
+            
+            if (!database || !table || !keyColumn || !days || !frequency) {
+                alert("Please fill in all fields before  scheduling.");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/schedule-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}&frequency=${frequency}`, {  
+                    method: "POST"
+                });
+                const result = await response.json();
+                alert(result.message || result.error);
+            } catch (error) {
+                console.error("Error feeding scheduling data:", error);
+            }
+        }
+
+        // function validateBeforeConfirm() {
+        //     const db = document.getElementById("database").value;
+        //     const table = document.getElementById("table").value;
+        //     const column = document.getElementById("key_column").value;
+        //     const days = document.getElementById("record_days").value;
+        //     const frequency = document.getElementById("frequency").value;
+        //     if (!db || !table || !column || !days || !frequency) {
+        //         alert("Please fill in all fields before confirming schedule.");
+        //         return;
+        //     }
+        //     alert("Task scheduled successfully!");
+        //     closeModal();
+        // }
+
+        //function openModal() { document.getElementById("scheduleModal").style.display = "flex"; }
+        //function closeModal() { document.getElementById("scheduleModal").style.display = "none"; }
+        
+        function exitWindow() { window.close(); }
     </script>
-</head>
-<body>
-    <div class="wrapper">
-        <div class="left-section">
-            <h2 class="text-center mb-4">Data Deletor</h2>
-            <form>
-                <div class="form-group">
-                    <label for="database" class="form-label">Database:</label>
-                    <select name="database" id="database" class="form-select" onchange="fetchTables()" required>
-                        <option value="">Select a Database</option>
-                        <option value="db1">dummy_database</option>
-                    </select>
-                </div>
 
-                <div class="form-group">
-                    <label for="table" class="form-label">Table:</label>
-                    <select name="table" id="table" class="form-select" onchange="fetchTableDetails()" required>
-                        <option value="">Select a Table</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="key_column" class="form-label">Key Column:</label>
-                    <select name="key_column" id="key_column" class="form-select" onchange="fetchcolumnnDetails()" required>
-                        <option value="">Select a Column</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-
-        <div class="right-section">
-            <div class="details-section">
-                <h4 class="mb-4">Details of the Table</h4>
-                <p><strong>Table Name:</strong> <span id="table_name">---</span></p>
-                <p><strong>Table Size:</strong> <span id="table_size">---</span></p>
-                <p><strong>Max Date:</strong> <span id="max_date">---</span></p>
-                <p><strong>Record Count:</strong> <span id="record_count">---</span></p>
-                <p><strong>Min Date:</strong> <span id="min_date">---</span></p>
-
-                <div class="form-group">
-                    <label for="record_days" class="form-label"> Number of Days to Keep Records:</label>
-                    <input type="number" id="record_days" class="form-control" onchange="calculateDeleteDate()">
-                </div>
-                <p><strong>Record Delete Date:</strong> <span id="delete_date">---</span></p>
-            </div>
-
-            <div class="buttons">
-                <button class="btn btn-success" onclick="deleteData()">Delete</button>
-                <button class="btn btn-primary">Schedule</button>
-                <button class="btn btn-danger" onclick="exitWindow()">Exit</button>
-                <!-- this is the script to close the window --> 
-                <script>
-                function exitWindow() {
-                    window.close();
-                }
-                </script>
-
-            </div>
-        </div>
-    </div>
 </body>
 </html>
