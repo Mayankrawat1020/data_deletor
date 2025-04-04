@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deletion/Scheduling</title>
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    
+    <!-- Internal CSS -->
+    <style>
+        /* Sidebar Styling */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: #95d5b2;
+            color: black;
+            padding: 20px;
+            transition: 0.3s;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin: 15px 0;
+            font-size: large;
+            font-weight: bold;
+        }
+        .sidebar ul li a {
+            color: black;
+            text-decoration: none;
+        }
+        .sidebar ul li:hover {
+            background-color: black !important;
+            color:white !important;
+            border-radius: 5px;
+        }
+        .sidebar ul li:hover a {
+            color: white !important;
+        }
+        .sidebar h3 {
+            font-weight: bold;
+            color: black;                 
+        }
+        .sidebar .btn {
+            font-size:large;
+            font-weight: bold;
+        }
+       
+        /* Analyze Button */
+        #AnalyzeButton {
+            background-color: #95d5b2 ;
+            border: none;
+            color: black !important;
+            padding: 0px 0px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin-bottom: 15px;
+        }
+        #AnalyzeButton:hover {
+            background-color: black !important;
+            color: white !important;
+            border-radius: 5px;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background-color: #95d5b2 !important;
+            color: black !important;
+            border: 2px solid black !important;
+            border-radius: 10px;
+        }
+        .dropdown-menu .dropdown-item:hover {
+            background-color: black !important;
+            color: white !important;
+        }
+
+        /* Performance Button */
+        #PerformanceButton {
+            background-color: transparent !important;
+            border: none !important;
+            color: black !important;
+            padding: 0px 0px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin-bottom: 20px;
+        }
+        #PerformanceButton:hover {
+            background-color: black !important;
+            color: white !important;
+            border-radius: 5px;
+        }
+
+        /* Welcome Page */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            margin-left: 300px;
+            background-color: #f5f9f7;
+        }
+        .welcome-container h1 {
+            font-size: 60px;
+            font-weight: bold;
+            color: black;
+        }
+        .welcome-container p {
+            font-size: 32px;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Main Content Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            color: black !important;
+        }
+    
+        .wrapper {
+            display: flex;
+            gap: 20px;
+            width: 80%;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom Button Styles */
+        .custom-btn {
+            background-color: #95d5b2;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+        .custom-btn:hover {
+            background-color: #000;
+            color: white;
+            transform: scale(1.05);
+        }
+        .custom-btn:active {
+            background-color: #333;
+            transform: scale(0.98);
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 30%;
+            max-width: 900px;
+            gap: 50px;
+        }
+
+        .left-section, .right-section {
+            width: 50%;
+            padding: 20px;
+        }
+
+        /* Modal Styling */
+        .modal {
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-dialog {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+        }
+        .close {
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Additional Styles */
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 90%;
+            margin: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+            position: center;
+        }
+        .heading-container {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .heading-container h2 {
+            font-size: 40px;
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <h3>DATA</h3>
+        <ul>
+            <li><a href="#" onclick="showMainContent()">Data Deletion/Scheduling</a></li>
+        </ul>
+        <!-- Analyze Dropdown -->
+        <div class="btn-group me-4">
+            <button id="AnalyzeButton" class="btn dropdown-toggle" data-bs-toggle="dropdown">
+                Analyze Database
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="analyzeDatabase('ANALYZE')">Analyze</a></li>
+                <li><a class="dropdown-item" href="#" onclick="analyzeDatabase('VACUUM FULL ANALYZE')">Vacuum Full Analyze</a></li>
+                <li><a class="dropdown-item" href="#" onclick="analyzeDatabase('VACUUM ANALYZE INDEX_CLEANUP')">Vacuum Analyze Index Cleanup</a></li>
+            </ul>
+        </div>
+        <!-- Performance Dropdown -->
+        <div class="btn-group me-4">
+            <button id="PerformanceButton" class="btn dropdown-toggle" data-bs-toggle="dropdown">
+                Performance
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/database_statistics">Database Statistics</a></li>
+                <li><a class="dropdown-item" href="/report_statistics">Table Statistics</a></li>
+            </ul>
+        </div>
+        <h3>REPORTS</h3>
+        <ul>
+            <li><a href="/master_table">Master Data</a></li>
+            <li><a href="/delete_data_log">Delete Data Log</a></li>
+            <li><a href="/scheduled_execution">Scheduled Execution</a></li>
+        </ul>
+    </div>
+    
+    <!-- Welcome Page -->
+    <div id="welcomePage" class="welcome-container">
+        <h1>Welcome to Performance Module</h1>
+        <p>Manage your data efficiently with scheduling and deletion features.</p>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="wrapper">
+        <div class="content-container"></div>
+        <div class="left-section">
+            <div class="heading-container">
+                <h2>Data Deletion/Scheduling</h2>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label for="database">Database:</label>
+                    <select id="database" class="form-select" onchange="fetchTables()">
+                        <option value="">Select a Database</option>
+                        <option value="Test_Delete">Test_Delete</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="table">Table:</label>
+                    <select id="table" class="form-select" onchange="fetchColumns()">
+                        <option value="">Select a Table</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="key_column">Key Column:</label>
+                    <select id="key_column" class="form-select" onchange="fetchTableDetails()">
+                        <option value="">Select a Column</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="right-section">
+            <div class="content-container"></div>
+            <div class="details-section">
+                <h4>Table Details</h4>
+                <p><strong>Table Name:</strong> <span id="table_name">---</span></p>
+                <p><strong>Table Size:</strong> <span id="table_size">---</span></p>
+                <p><strong>Record Count:</strong> <span id="record_count">---</span></p>
+                <p><strong>Min Date:</strong> <span id="min_date">---</span></p>
+                <p><strong>Max Date:</strong> <span id="max_date">---</span></p>
+
+                <div class="form-group">
+                    <label for="record_days">Number of Days to Keep Records: </label>
+                    <input type="number" id="record_days" class="form-control" onchange="calculateDeleteDate()">
+                </div>
+                <p><strong style="color: #ef233c;">Record Delete Date: </strong> <span id="delete_date" style="color: #ef233c">---</span></p>
+            </div>
+
+            <div class="buttons">
+                <button class="custom-btn" onclick="deleteData()">Delete</button>
+                <button id="schedule_btn" class="custom-btn" onclick="openScheduleModal()">Schedule</button>
+                <button class="custom-btn" onclick="goHome()">Exit</button>
+            </div>
+            
+            <!-- Schedule Modal -->
+            <div id="schedule_modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeScheduleModal()">&times;</span>
+                    <h3>Schedule Task</h3>
+                    
+                    <label for="schedule_frequency">Select Frequency:</label>
+                    <select id="schedule_frequency" class="form-select" name="frequency" onchange="updateNextRunDate()">
+                        <option value="1">1 (Daily)</option>
+                        <option value="2">2 (Alternate Days)</option>
+                        <option value="7">7 (Weekly)</option>
+                        <option value="30">30 (Monthly)</option>
+                    </select>
+
+                    <p><strong>Next Run Date:</strong> <span id="next_run_date">---</span></p>
+        
+                    <button class="btn btn-success" onclick="validateBeforeSchedule()">Confirm Schedule</button>
+                    <button class="btn btn-secondary" onclick="closeScheduleModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    
+    <!-- Internal JavaScript -->
+    <script>
+        // UI Functions
+        function showMainContent() {
+            document.getElementById("welcomePage").style.display = "none";
+        }
+
+        function openScheduleModal() {
+            document.getElementById("schedule_modal").style.display = "flex";
+        }
+
+        function closeScheduleModal() {
+            document.getElementById("schedule_modal").style.display = "none";
+        }
+
+        function updateNextRunDate() {
+            const frequency = document.getElementById("schedule_frequency").value;
+            if (frequency) {
+                let nextDate = new Date();
+                nextDate.setDate(nextDate.getDate() + parseInt(frequency));
+                document.getElementById("next_run_date").textContent = nextDate.toISOString().split('T')[0];
+            }
+        }
+
+        function goHome() {
+            localStorage.setItem("showSidebar", "true");
+            window.location.href = "/";
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem("showSidebar") === "true") {
+                localStorage.removeItem("showSidebar");
+                showPerformanceSidebar();
+            }
+        });
+
+        // Data Fetching Functions
+        async function fetchTables() {
+            const database = document.getElementById("database").value;
+            const tableDropdown = document.getElementById("table");
+            tableDropdown.innerHTML = '<option value="">Select a Table</option>';
+
+            if (database) {
+                const response = await fetch(`/get-tables?database=${database}`);
+                const tables = await response.json();
+                tables.forEach(table => {
+                    const option = document.createElement("option");
+                    option.value = table;
+                    option.textContent = table;
+                    tableDropdown.appendChild(option);
+                });
+            }
+        }
+
+        async function fetchColumns() {
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const columnDropdown = document.getElementById("key_column");
+            columnDropdown.innerHTML = '<option value="">Select a Column</option>';
+
+            if (database && table) {
+                const response = await fetch(`/get-columns?database=${database}&table=${table}`);
+                const columns = await response.json();
+                columns.forEach(column => {
+                    const option = document.createElement("option");
+                    option.value = column;
+                    option.textContent = column;
+                    columnDropdown.appendChild(option);
+                });
+            }
+        }
+
+        async function fetchTableDetails() {
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const column = document.getElementById("key_column").value;
+
+            if (database && table && column) {
+                const response = await fetch(`/get-table-details?database=${database}&table=${table}&key-column=${column}`);
+                const details = await response.json();
+                document.getElementById("table_name").textContent = table || "---";
+                document.getElementById("table_size").textContent = details.table_size || "---";
+                document.getElementById("record_count").textContent = details.record_count || "---";
+                document.getElementById("min_date").textContent = details.min_date || "---";
+                document.getElementById("max_date").textContent = details.max_date || "---";
+            }
+        }
+
+        // Data Manipulation Functions
+        function calculateDeleteDate() {
+            let maxDate = document.getElementById("max_date").textContent;
+            let days = document.getElementById("record_days").value;
+            if (maxDate && days) {
+                let deleteDate = new Date(maxDate);
+                deleteDate.setDate(deleteDate.getDate() - days);
+                document.getElementById("delete_date").textContent = deleteDate.toISOString().split('T')[0];
+            }
+        }
+
+        async function deleteData() {
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const keyColumn = document.getElementById("key_column").value;
+            const days = document.getElementById("record_days").value;
+
+            if (!database || !table || !keyColumn || !days) {
+                alert("Please select database, table, key column, and enter the number of days.");
+                return;
+            }
+
+            const confirmDelete = confirm("Are you sure you want to delete records?");
+            if (!confirmDelete) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/delete-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}`, {  
+                    method: "POST"
+                });
+
+                const result = await response.json();
+                alert(result.message || result.error);
+
+                if (result.status === "success") {
+                    console.log("Deletion successful!");                   
+                }
+            } catch (error) {
+                console.error("Error deleting data:", error);
+            }
+        }
+
+        async function validateBeforeSchedule() {            
+            const database = document.getElementById("database").value;
+            const table = document.getElementById("table").value;
+            const keyColumn = document.getElementById("key_column").value;
+            const days = document.getElementById("record_days").value;
+            const frequency = document.getElementById("schedule_frequency").value;
+            
+            if (!database || !table || !keyColumn || !days || !frequency) {
+                alert("Please fill in all fields before scheduling.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/schedule-data?database=${database}&table=${table}&key-column=${keyColumn}&days=${days}&frequency=${frequency}`, {  
+                    method: "POST"
+                });
+
+                const result = await response.json();
+                alert(result.message || result.error);
+
+                if (result.status === "success") {
+                    console.log("Scheduling successful! ");                    
+                }
+            } catch (error) {
+                console.error("Error scheduling data:", error);
+            }
+        }
+
+        // Database Analysis Functions
+        function analyzeDatabase(option) {
+            let message = "";
+
+            if (option === "ANALYZE") {
+                message = "The process will take time. Do you wish to continue?";
+            } else if (option === "VACUUM FULL ANALYZE") {
+                message = "Access to the table will be blocked, and extra disk space will be used during the operation. Do you wish to continue?";
+            } else if (option === "VACUUM ANALYZE INDEX_CLEANUP") {
+                message = "The process will take time. Do you wish to continue?";
+            }
+
+            if (confirm(message)) {
+                fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: option })
+                })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+</body>
+</html>
